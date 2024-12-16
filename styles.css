@@ -1,0 +1,80 @@
+/* Centrar el título principal */
+h1 {
+    text-align: center;
+}
+
+/* Imagen principal */
+#main-image {
+    display: block;
+    margin: 20px auto; /* Centrar la imagen */
+    max-width: 80%; /* Limitar el ancho al 80% del contenedor */
+    height: auto; /* Mantener las proporciones */
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para estética */
+}
+
+/* Imágenes de categorías */
+.category-image {
+    display: block;
+    margin: 20px auto; /* Centrar la imagen */
+    max-width: 80%; /* Limitar el ancho al 80% del contenedor */
+    height: auto; /* Mantener las proporciones */
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para estética */
+}
+
+/* Botones de la pantalla principal */
+.category-btn {
+    display: inline-block;
+    margin: 10px;
+    padding: 15px 30px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s ease;
+}
+
+.category-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Botón de peligro */
+.danger {
+    background-color: #DC3545;
+}
+
+.danger:hover {
+    background-color: #A71D2A;
+}
+
+/* Botón para restablecer */
+.reset-btn {
+    display: inline-block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: #ffc107;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.reset-btn:hover {
+    background-color: #e0a800;
+}
+
+/* Lista de formularios */
+.form-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.form-list li {
+    margin-bottom: 15px;
+}

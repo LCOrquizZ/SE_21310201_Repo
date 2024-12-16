@@ -3,67 +3,283 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adivina el Jugador NBA</title>
+    <title>Le Chef Expert</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f0f0f0;
-        }
-        h1 {
-            text-align: center;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .container img {
-            display: block;
-            margin: 0 auto;
-            width: 300px;
-            height: auto;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-        button {
-            margin-top: 10px;
-            display: block;
+        /* Ajustar el tamaño de los cuadros de entrada */
+        input[type="text"] {
             width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            color: white;
+            max-width: 500px;
+            box-sizing: border-box;
         }
-        button:hover {
-            background-color: #45a049;
+
+        /* Configuración de tamaño de imágenes */
+        #main-image {
+            width: 500px; /* Tamaño de la imagen principal */
+            height: 300px; /* Altura ajustable */
+        }
+
+        .category-image {
+            width: 400px; /* Tamaño ajustable para imágenes de categorías */
+            height: auto; /* Altura automática o ajustable */
         }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <!-- Imagen principal -->
-    <img src="./GuessWhoCover1.jpg" alt="Logo NBA">
-
-    <h1>Adivina el Jugador NBA</h1>
-    <div id="menu">
-        <button id="btnAgregar">Agregar Jugador</button>
-        <button id="btnMostrar">Mostrar Jugadores</button>
-        <button id="btnPreguntar">Hacer Preguntas</button>
-        <button id="btnSalir">Salir</button>
+    <!-- Pantalla principal -->
+    <div class="container" id="main-screen">
+        <h1>Le Chef Expert</h1>
+        <img src="Chef.jpg" alt="Imagen principal" id="main-image" class="image-placeholder">
+        <button class="category-btn" onclick="navigateTo('desayuno')">Desayuno</button>
+        <button class="category-btn" onclick="navigateTo('comida')">Comida</button>
+        <button class="category-btn" onclick="navigateTo('cena')">Cena</button>
+        <button class="category-btn" onclick="navigateTo('agregar')">Agregar Platillo</button>
+        <button class="category-btn danger" onclick="navigateTo('eliminar')">Eliminar Platillo</button>
     </div>
 
-    <div id="contenido"></div>
-</div>
+    <!-- Pantalla dinámica -->
+    <div class="container" id="dynamic-screen" style="display: none;">
+        <div id="dynamic-content"></div>
+    </div>
 
-<script src="./script.js"></script>
+    <script>
+        // Inicializar datos en localStorage si no existen
+        const initializeData = () => {
+            if (!localStorage.getItem('recetas')) {
+                localStorage.setItem(
+                    'recetas',
+                    JSON.stringify({ desayuno: [], comida: [], cena: [] })
+                );
+            }
+        };
 
+        initializeData();
+
+        // Mostrar mensaje
+        function showMessage(message, type = 'info') {
+            alert(message); // Simple implementación para mostrar mensajes
+        }
+
+        // Navegar entre pantallas
+        function navigateTo(section) {
+            const mainScreen = document.getElementById('main-screen');
+            const dynamicScreen = document.getElementById('dynamic-screen');
+            const dynamicContent = document.getElementById('dynamic-content');
+
+            mainScreen.style.display = 'none';
+            dynamicScreen.style.display = 'block';
+
+            // Renderizar contenido dinámico según la sección seleccionada
+            if (section === 'agregar') {
+                renderAddScreen(dynamicContent);
+            } else if (section === 'eliminar') {
+                renderDeleteScreen(dynamicContent);
+            } else {
+                renderCategoryScreen(section, dynamicContent);
+            }
+        }
+
+        // Volver a la pantalla principal
+        function goBack() {
+            const mainScreen = document.getElementById('main-screen');
+            const dynamicScreen = document.getElementById('dynamic-screen');
+
+            mainScreen.style.display = 'block';
+            dynamicScreen.style.display = 'none';
+        }
+
+        // Renderizar pantalla de categorías
+        function renderCategoryScreen(categoria, container) {
+            const recetas = JSON.parse(localStorage.getItem('recetas'))[categoria];
+            const categoryImage = `${categoria}.jpg`;
+
+            container.innerHTML = `
+                <h1 class="category-title">${categoria.toUpperCase()}</h1>
+                <img src="${categoryImage}" alt="Imagen de ${categoria}" class="category-image">
+                <h2>Ingredientes Disponibles</h2>
+                <ul class="form-list">
+                    <li>
+                        <label for="grupo1-${categoria}">Grupo 1 (3 puntos):</label>
+                        <input type="text" id="grupo1-${categoria}" placeholder="Ejem: Cereales, Papa, Grasas/Aceites, Pan, Azúcares">
+                    </li>
+                    <li>
+                        <label for="grupo2-${categoria}">Grupo 2 (2 puntos):</label>
+                        <input type="text" id="grupo2-${categoria}" placeholder="Ejem: Proteínas, Lácteos, Legumbres, Frutos secos">
+                    </li>
+                    <li>
+                        <label for="grupo3-${categoria}">Grupo 3 (1 punto):</label>
+                        <input type="text" id="grupo3-${categoria}" placeholder="Ejem: Verduras, Frutas, Hortalizas">
+                    </li>
+                </ul>
+                <button onclick="searchPlatillos('${categoria}')">Buscar Platillos</button>
+                <h2>Platillos Disponibles</h2>
+                <ul>
+                    ${recetas.length > 0 ? recetas.map(platillo => `
+                        <li>
+                            <strong>${platillo.nombre}</strong> - Puntaje: ${platillo.puntaje}
+                        </li>
+                    `).join('') : '<li>No hay platillos disponibles</li>'}
+                </ul>
+                <button onclick="goBack()">Volver</button>
+            `;
+        }
+
+            // Buscar platillos según los ingredientes proporcionados
+                function searchPlatillos(categoria) {
+            // Obtener valores de los campos de ingredientes
+            const grupo1 = document.getElementById(`grupo1-${categoria}`).value
+                .split(',')
+                .map(i => i.trim().toLowerCase())
+                .filter(i => i !== ""); // Filtrar valores vacíos
+
+            const grupo2 = document.getElementById(`grupo2-${categoria}`).value
+                .split(',')
+                .map(i => i.trim().toLowerCase())
+                .filter(i => i !== ""); // Filtrar valores vacíos
+
+            const grupo3 = document.getElementById(`grupo3-${categoria}`).value
+                .split(',')
+                .map(i => i.trim().toLowerCase())
+                .filter(i => i !== ""); // Filtrar valores vacíos
+
+            const recetas = JSON.parse(localStorage.getItem('recetas'))[categoria];
+
+            // Filtrar las recetas que coincidan con los ingredientes
+            const resultados = recetas.filter(platillo => {
+                const ingredientesPlatillo = platillo.ingredientes;
+
+                // Verificar coincidencias en cada grupo
+                const grupo1Coincide = grupo1.every(ing => 
+                    ingredientesPlatillo.grupo1.some(ingr => ingr.toLowerCase() === ing)
+                );
+
+                const grupo2Coincide = grupo2.every(ing => 
+                    ingredientesPlatillo.grupo2.some(ingr => ingr.toLowerCase() === ing)
+                );
+
+                const grupo3Coincide = grupo3.every(ing => 
+                    ingredientesPlatillo.grupo3.some(ingr => ingr.toLowerCase() === ing)
+                );
+
+                // Devuelve true solo si todos los grupos proporcionados coinciden
+                return grupo1Coincide && grupo2Coincide && grupo3Coincide;
+            });
+
+            // Mostrar resultados
+            if (resultados.length > 0) {
+                const nombres = resultados.map(r => r.nombre).join(', ');
+                showMessage(`Platillos encontrados: ${nombres}`);
+            } else {
+                showMessage('No se encontraron platillos con los ingredientes proporcionados.', 'warning');
+            }
+        }
+
+        // Renderizar pantalla de agregar platillos
+        function renderAddScreen(container) {
+            container.innerHTML = `
+                <h1>Agregar Nuevo Platillo</h1>
+                <ul class="form-list">
+                    <li>
+                        <label for="categoria">Categoría:</label>
+                        <select id="categoria">
+                            <option value="desayuno">Desayuno</option>
+                            <option value="comida">Comida</option>
+                            <option value="cena">Cena</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label for="nombre">Nombre del Platillo:</label>
+                        <input type="text" id="nombre" placeholder="Ejem: Caldo de pollo, Tacos">
+                    </li>
+                    <li>
+                        <label>Grupo 1 (3 puntos):</label>
+                        <input type="text" id="grupo1" placeholder="Ejem: Cereales, Papa, Grasas/Aceites, Pan, Azúcares">
+                    </li>
+                    <li>
+                        <label>Grupo 2 (2 puntos):</label>
+                        <input type="text" id="grupo2" placeholder="Ejem: Proteínas, Lácteos, Legumbres, Frutos secos">
+                    </li>
+                    <li>
+                        <label>Grupo 3 (1 punto):</label>
+                        <input type="text" id="grupo3" placeholder="Ejem: Verduras, Frutas, Hortalizas">
+                    </li>
+                </ul>
+                <button onclick="addPlatillo()">Agregar Platillo</button>
+                <button onclick="goBack()">Volver</button>
+            `;
+        }
+
+        // Renderizar pantalla de eliminar platillos
+        function renderDeleteScreen(container) {
+            container.innerHTML = `
+                <h1>Eliminar Platillo</h1>
+                <ul class="form-list">
+                    <li>
+                        <label for="delete-categoria">Categoría:</label>
+                        <select id="delete-categoria">
+                            <option value="desayuno">Desayuno</option>
+                            <option value="comida">Comida</option>
+                            <option value="cena">Cena</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label for="delete-nombre">Nombre del Platillo:</label>
+                        <input type="text" id="delete-nombre" placeholder="Ejem: Caldo de pollo, Tacos">
+                    </li>
+                </ul>
+                <button class="danger" onclick="deletePlatillo()">Eliminar Platillo</button>
+                <button onclick="goBack()">Volver</button>
+            `;
+        }
+
+        // Eliminar un platillo
+        function deletePlatillo() {
+            const categoria = document.getElementById('delete-categoria').value;
+            const nombre = document.getElementById('delete-nombre').value.trim().toLowerCase();
+
+            const recetas = JSON.parse(localStorage.getItem('recetas'));
+            const filtered = recetas[categoria].filter(platillo => platillo.nombre.toLowerCase() !== nombre);
+
+            if (filtered.length === recetas[categoria].length) {
+                showMessage('Platillo no encontrado', 'error');
+                return;
+            }
+
+            recetas[categoria] = filtered;
+            localStorage.setItem('recetas', JSON.stringify(recetas));
+
+            showMessage('Platillo eliminado con éxito.');
+            goBack();
+        }
+
+            // Agregar un platillo
+                function addPlatillo() {
+            const categoria = document.getElementById('categoria').value;
+            const nombre = document.getElementById('nombre').value.trim();
+            const grupo1 = document.getElementById('grupo1').value.split(',').map(i => i.trim()).filter(i => i !== "");
+            const grupo2 = document.getElementById('grupo2').value.split(',').map(i => i.trim()).filter(i => i !== "");
+            const grupo3 = document.getElementById('grupo3').value.split(',').map(i => i.trim()).filter(i => i !== "");
+
+            // Calcular puntaje ignorando campos vacíos
+            const puntaje = 
+                (grupo1.length > 0 ? grupo1.length * 3 : 0) +
+                (grupo2.length > 0 ? grupo2.length * 2 : 0) +
+                (grupo3.length > 0 ? grupo3.length * 1 : 0);
+
+            if (!nombre || (grupo1.length === 0 && grupo2.length === 0 && grupo3.length === 0)) {
+                showMessage('Por favor, complete el nombre y al menos un grupo de ingredientes.', 'error');
+                return;
+            }
+
+            const recetas = JSON.parse(localStorage.getItem('recetas'));
+
+            recetas[categoria].push({ nombre, ingredientes: { grupo1, grupo2, grupo3 }, puntaje });
+            localStorage.setItem('recetas', JSON.stringify(recetas));
+
+            showMessage('Platillo agregado con éxito.');
+            goBack();
+        }
+
+    </script>
 </body>
 </html>
